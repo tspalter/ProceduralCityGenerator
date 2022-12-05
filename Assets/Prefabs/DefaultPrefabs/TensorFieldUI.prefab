@@ -1,0 +1,56 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &8799586607292359158
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 8799586607292359152}
+  - component: {fileID: 8799586607292359153}
+  m_Layer: 0
+  m_Name: TensorFieldUI
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &8799586607292359152
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8799586607292359158}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 995.99945, y: 825.38837, z: 3889.7385}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &8799586607292359153
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8799586607292359158}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fda03568e28922a40b33a59fc39c8692, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  sea: []
+  river: []
+  ignoreRiver: 0
+  smooth: 0
+  TENSOR_LINE_DIAMETER: 0
+  worldDims: {x: 0, y: 0, z: 0}
+  d: {fileID: 8961716075819767545, guid: 8fd1e00f197f96149b8d3165d2d5e9f9, type: 3}
+  gridOrigin: {fileID: 8410456967436320823, guid: b81b01b03f56f7c468e1654a0c5b7c23, type: 3}
+  radialOrigin: {fileID: 8485496731412788547, guid: 7445d52d44377674dbf15eb6b9f20efd, type: 3}
+  tensorFieldMenu: {fileID: 9070855556765832454, guid: 2ba5f948491ce4643bb70cca332c48be, type: 3}
