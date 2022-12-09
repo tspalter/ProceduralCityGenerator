@@ -9,11 +9,11 @@ public enum FIELD_TYPE
 public abstract class BasisField
 {
     // global vars
-    string FOLDER_NAME;
+    public string FOLDER_NAME = "";
     public FIELD_TYPE fieldType;
     protected int folderNameIndex = 0;
     public Vector3 _center;
-    public int _size;
+    public float _size;
     public float _decay;
 
     protected BasisField() { }
@@ -59,7 +59,7 @@ public abstract class BasisField
         Vector3 diff = Vector3.zero;
         diff.x = point.x - this._center.x;
         diff.z = point.z - this._center.z;
-        float normalDistToCenter = diff.magnitude / this._size;
+        float normalDistToCenter = (diff.magnitude / this._size) * 50f;
         if (smooth)
         {
             return Mathf.Pow(normalDistToCenter, -this._decay);

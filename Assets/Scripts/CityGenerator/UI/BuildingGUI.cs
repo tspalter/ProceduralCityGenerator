@@ -61,7 +61,7 @@ public class BuildingModels
 }
 
 // Finds building lots and optionally creates extrusions of those buildings
-public class Buildings
+public class Buildings : MonoBehaviour
 {
     private PolygonFinder _polygonFinder;
     private List<List<Vector3>> allStreamlines = new List<List<Vector3>>();

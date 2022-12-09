@@ -220,7 +220,7 @@ public class PolygonUtil : MonoBehaviour
 
 	public static bool insidePolygon(Vector3 point, List<Vector3> poly)
     {
-		if (poly.Count == 0)
+		if (poly.Count < 1)
 			return false;
 
 		bool inside = false;
@@ -236,7 +236,6 @@ public class PolygonUtil : MonoBehaviour
 			if (intersect)
 				inside = !inside;
 		}
-
 		return inside;
     }
 

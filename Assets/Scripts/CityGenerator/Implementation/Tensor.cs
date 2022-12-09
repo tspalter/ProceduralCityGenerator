@@ -3,13 +3,13 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Tensor
+public class Tensor : MonoBehaviour
 {
     // global vars
     private bool oldTheta;
-    private float _theta;
-    private float _r;
-    private float[] _matrix;
+    public float _theta;
+    public float _r;
+    public float[] _matrix;
 
     public Tensor(float r, float[] matrix)
     {
@@ -59,12 +59,13 @@ public class Tensor
         {
             newMat[i] = (this._matrix[i] * this._r) + (tensor._matrix[i] * tensor._r);
         }
+        this._matrix = newMat;
         if (smooth)
         {
-            this._r = hypot(newMat);
-            for (int i = 0; i < newMat.Length; i++)
+            this._r = hypot(this._matrix);
+            for (int i = 0; i < this._matrix.Length; i++)
             {
-                newMat[i] = newMat[i] / this._r;
+                this._matrix[i] = this._matrix[i] / this._r;
             }
         }
         else
@@ -73,7 +74,6 @@ public class Tensor
         }
 
         this.oldTheta = true;
-        this._matrix = newMat;
         return this;
     }
 

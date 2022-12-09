@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Integrator : MonoBehaviour
+public abstract class Integrator
 {
     protected TensorField _field;
 
@@ -18,10 +18,7 @@ public class Integrator : MonoBehaviour
         this._field = new TensorField();
     }
 
-    public Vector3 integrate(Vector3 point, bool major)
-    {
-        return point;
-    }
+    public abstract Vector3 integrate(Vector3 point, bool major);
 
     protected Vector3 sampleFieldVector(Vector3 point, bool major)
     {
@@ -47,7 +44,7 @@ public class EulerIntegrator : Integrator
         this._params = parameters;
     }
 
-    public Vector3 integrate(Vector3 point, bool major)
+    public override Vector3 integrate(Vector3 point, bool major)
     {
         return this.sampleFieldVector(point, major) * this._params.dstep;
     }
@@ -62,7 +59,7 @@ public class RK4Integrator : Integrator
         this._params = parameters;
     }
 
-    public Vector3 integrate(Vector3 point, bool major)
+    public override Vector3 integrate(Vector3 point, bool major)
     {
         Vector3 k1 = this.sampleFieldVector(point, major);
         Vector3 k23 = this.sampleFieldVector(new Vector3(point.x + (this._params.dstep / 2), point.y, point.z + (this._params.dstep / 2)), major);

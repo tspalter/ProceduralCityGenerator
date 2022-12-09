@@ -5,17 +5,18 @@ using UnityEngine;
 
 public class TensorFieldUI : TensorField
 {
-    public float TENSOR_LINE_DIAMETER = 20f;
+    public float TENSOR_LINE_DIAMETER = 10f;
     private float TENSOR_SPAWN_SCALE = 0.7f; // how much to shrink worldDims to find spawn point
     private float worldWidth = Screen.width / (10f / Camera.main.orthographicSize);
     private float worldHeight = Screen.height / (10f / Camera.main.orthographicSize);
     public Vector3 worldDims = Vector3.zero;
 
-    public DragController d;
     public GameObject gridOrigin;
     public GameObject radialOrigin;
 
     public GameObject tensorFieldMenu;
+
+    public GameObject tensorPrefab;
 
     public TensorFieldUI(bool drawCenter, NoiseParams noiseParams) : base(noiseParams)
     {
@@ -23,9 +24,23 @@ public class TensorFieldUI : TensorField
 
     public void Start()
     {
+        this.basisFields = new List<BasisField>();
+        Instantiate(d);
+
+        this.TENSOR_LINE_DIAMETER = 30f;
+        this.TENSOR_SPAWN_SCALE = 0.7f;
         this.worldWidth = Screen.width / (10f / Camera.main.orthographicSize);
         this.worldHeight = Screen.height / (10f / Camera.main.orthographicSize);
+        this.worldDims = new Vector3(worldWidth / 10f, 0f, worldHeight / 10f);
+
+        this.parks = new List<List<Vector3>>();
+        this.sea = new List<Vector3>();
+        this.river = new List<Vector3>();
+        this.ignoreRiver = false;
+        this.smooth = false;
         setRecommended();
+
+        Draw();
     }
 
     public void Update()
@@ -33,11 +48,9 @@ public class TensorFieldUI : TensorField
         this.TENSOR_LINE_DIAMETER = 20f;
         this.worldWidth = Screen.width / (10f / Camera.main.orthographicSize);
         this.worldHeight = Screen.height / (10f / Camera.main.orthographicSize);
-        this.worldDims = new Vector3(worldWidth, worldHeight);
-        if (tensorFieldMenu.activeInHierarchy)
-        {
-            Draw();
-        }
+        this.worldDims = new Vector3(worldWidth / 10f, 0f, worldHeight / 10f);
+
+        // this.UpdateDraw();
     }
 
     // 4 grids, one radial
@@ -45,13 +58,12 @@ public class TensorFieldUI : TensorField
     {
         this.reset();
         Vector3 size = this.worldDims * this.TENSOR_SPAWN_SCALE;
-        Vector3 newOrigin = (this.worldDims * (1f - this.TENSOR_SPAWN_SCALE / 2f)) + Vector3.zero;
-        Debug.Log("New origin is at " + newOrigin);
-        this.addRadialRandom();
+        Vector3 newOrigin = (this.worldDims * (1f - this.TENSOR_SPAWN_SCALE / 2f) / 50f) + Vector3.zero;
         this.addGridAtLocation(newOrigin);
         this.addGridAtLocation(newOrigin + size);
         this.addGridAtLocation(newOrigin + new Vector3(size.x, 0f, 0f));
-        this.addGridAtLocation(newOrigin + new Vector3(0f, 0f, size.y));
+        this.addGridAtLocation(newOrigin + new Vector3(0f, 0f, size.z));
+        this.addRadialRandom();
     }
 
     private void addRadialRandom()
@@ -70,13 +82,11 @@ public class TensorFieldUI : TensorField
 
     private void addGridAtLocation(Vector3 newOrigin)
     {
-        Debug.Log("Creating grid at " + newOrigin);
         float width = this.worldDims.x;
         this.addGrid(newOrigin, 
             (int)UnityEngine.Random.Range(width / 4, width), 
             UnityEngine.Random.Range(0, 50f), 
             UnityEngine.Random.Range(0f, Mathf.PI / 2));
-        Debug.Log("Grid Added at " + newOrigin);
         GameObject grid = UnityEngine.Object.Instantiate(gridOrigin, new Vector3(newOrigin.x, newOrigin.y, newOrigin.z), Quaternion.identity);
         d.draggables.Add(grid);
     }
@@ -97,9 +107,9 @@ public class TensorFieldUI : TensorField
         Vector3 worldDimensions = new Vector3(this.worldDims.x, this.worldDims.y, this.worldDims.z);
         int nHor = (int)(Mathf.Ceil(worldDimensions.x / diameter) + 1f); // prevent pop-in
         int nVert = (int)(Mathf.Ceil(worldDimensions.z / diameter) + 1f);
-        float originX = diameter * Mathf.Floor(Camera.main.ScreenToWorldPoint(Camera.main.transform.position).x / diameter);
-        float originY = diameter * Mathf.Floor(Camera.main.ScreenToWorldPoint(Camera.main.transform.position).y / diameter);
-        float originZ = diameter * Mathf.Floor(Camera.main.ScreenToWorldPoint(Camera.main.transform.position).z / diameter);
+        float originX = diameter * Mathf.Floor(Camera.main.ScreenToWorldPoint(Camera.main.transform.position).x / diameter) / 50f;
+        float originY = 0f;
+        float originZ = diameter * Mathf.Floor(Camera.main.ScreenToWorldPoint(Camera.main.transform.position).z / diameter) / 50f;
 
         List<Vector3> output = new List<Vector3>();
         for (int i = 0; i <= nHor; i++)
@@ -114,10 +124,15 @@ public class TensorFieldUI : TensorField
 
     public List<Vector3> getTensorLine(Vector3 point, Vector3 tensorV)
     {
+        Debug.Log("Starting point for line: " + point);
         Vector3 transformedPoint = Camera.main.WorldToScreenPoint(point);
+        Debug.Log("Transformed point: " + transformedPoint);
         Vector3 diff = tensorV * (this.TENSOR_LINE_DIAMETER / 2); // assuming tensorV is normalized
+        Debug.Log("Diff Vector: " + diff);
         Vector3 start = transformedPoint - diff;
+        Debug.Log("Starting point: " + start);
         Vector3 end = transformedPoint + diff;
+        Debug.Log("Ending point: " + end);
         return new List<Vector3> { start, end };
     }
 
@@ -126,11 +141,28 @@ public class TensorFieldUI : TensorField
         List<Vector3> tensorPoints = this.getCrossLocations();
         foreach (Vector3 p in tensorPoints)
         {
-            Tensor t = this.samplePoint(new Vector3(p.x, p.y, p.z));
+            Tensor t = this.samplePoint(p);
+            Vector3 major = t.getMajor();
+            Vector3 minor = t.getMinor();
+            //List<Vector3> majorLine = this.getTensorLine(p, major);
+            //Vector3 diffVec = majorLine[1] - majorLine[0];
+            tensorPrefab.transform.position = p;
+            tensorPrefab.transform.rotation = Quaternion.Euler(major.x, major.y, major.z);
+            Instantiate(tensorPrefab);
+        }
+    }
+
+    public void UpdateDraw()
+    {
+        GameObject[] gameObjects = GameObject.FindGameObjectsWithTag("Tensor");
+        foreach (GameObject g in gameObjects)
+        {
+            Vector3 p = g.transform.position;
+            Tensor t = this.samplePoint(p);
             Vector3 major = new Vector3(t.getMajor().x, t.getMajor().y, t.getMajor().z);
-            Vector3 minor = new Vector3(t.getMinor().x, t.getMinor().y, t.getMinor().z);
-            this.drawLine(this.getTensorLine(p, major));
-            this.drawLine(this.getTensorLine(p, minor));
+            List<Vector3> majorLine = this.getTensorLine(p, major);
+            Vector3 diffVec = majorLine[1] - majorLine[0];
+            g.transform.rotation = Quaternion.Euler(diffVec.y, diffVec.x, diffVec.z);
         }
     }
 
@@ -154,8 +186,7 @@ public class TensorFieldUI : TensorField
     public void reset()
     {
         Debug.Log("Resetting");
-        foreach (GameObject g in d.draggables)
-            UnityEngine.Object.Destroy(g);
+        this.basisFields = new List<BasisField>();
 
         d.draggables = new List<GameObject>();
     }

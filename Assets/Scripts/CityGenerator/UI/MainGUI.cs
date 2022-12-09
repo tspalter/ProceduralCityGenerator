@@ -40,16 +40,11 @@ public class MainGUI : MonoBehaviour
     {
         // initialize all class objects
         Instantiate(this._tensorField);
-        Debug.Log("Instaniated Tensor Field");
         this.tensorFieldUI = Instantiate(this.tensorFieldUI);
-        Debug.Log("Instaniated Tensor Field UI");
-        //this.minorParams = new StreamlineParams();
-        //this.majorParams = new StreamlineParams();
-        //this.mainParams = new StreamlineParams();
-        //Debug.Log("Instaniated parameter fields");
-        //this.coastline = new WaterGUI(this._tensorField, new WaterParams(), new Integrator());
-        //this.buildings = new Buildings(this._tensorField, 0f, false);
-        //Debug.Log("Instaniated additional UI");
+        this.minorParams = new StreamlineParams();
+        this.majorParams = new StreamlineParams();
+        this.mainParams = new StreamlineParams();
+        Debug.Log("Instaniated parameter fields");
         //this.minorParams.dsep = 20f;
         //this.minorParams.dtest = 15f;
         //this.minorParams.dstep = 1f;
@@ -61,6 +56,9 @@ public class MainGUI : MonoBehaviour
         //this.minorParams.simplifyTolerance = 0.5f;
         //this.minorParams.collideEarly = 0f;
         //Debug.Log("Initialized minor params");
+        // this.coastline = new WaterGUI(this._tensorField, new WaterParams(), new RK4Integrator(this._tensorField, this.minorParams));
+        this.buildings = new Buildings(this._tensorField, 0f, false);
+        Debug.Log("Instaniated additional UI");
     }
 
     public MainGUI(TensorField tensorField)

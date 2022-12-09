@@ -27,9 +27,11 @@ public struct NoiseParams
 public class TensorField : MonoBehaviour
 {
     // global vars
-    private List<BasisField> basisFields;
+    public List<BasisField> basisFields;
     public Noise noise;
     private NoiseParams nParams;
+
+    public DragController d;
 
     public List<List<Vector3>> parks = new List<List<Vector3>>();
     public List<Vector3> sea = new List<Vector3>();
@@ -40,7 +42,17 @@ public class TensorField : MonoBehaviour
 
     public void Start()
     {
-        basisFields = new List<BasisField>();
+        this.basisFields = new List<BasisField>();
+        this.noise = new Noise();
+        this.nParams = new NoiseParams();
+
+        this.parks = new List<List<Vector3>>();
+        this.sea = new List<Vector3>();
+        this.river = new List<Vector3>();
+        this.ignoreRiver = false;
+        this.smooth = false;
+
+        // Instantiate(d);
     }
 
     public TensorField(NoiseParams noiseParams)
@@ -70,23 +82,19 @@ public class TensorField : MonoBehaviour
 
     public void addGrid(Vector3 center, int size, float decay, float theta)
     {
-        Grid grid = new Grid(center, size, decay, theta);
-        Debug.Log("Grid created");
+        BasisField grid = new Grid(center, size, decay, theta);
         this.addField(grid);
-        Debug.Log("Field was added");
     }
 
     public void addRadial(Vector3 center, int size, float decay)
     {
-        Radial radial = new Radial(center, size, decay);
+        BasisField radial = new Radial(center, size, decay);
         this.addField(radial);
     }
 
-    protected void addField(BasisField basisField)
+    public void addField(BasisField basisField)
     {
-        Debug.Log("Created field " + basisField);
         this.basisFields.Add(basisField);
-        Debug.Log("Field Added");
     }
 
     protected void removeField(BasisField basisField)
@@ -127,7 +135,6 @@ public class TensorField : MonoBehaviour
             // degenerate point
             return Tensor.zero();
         }
-
         // default field is a grid
         if (this.basisFields.Count == 0)
         {
@@ -137,12 +144,18 @@ public class TensorField : MonoBehaviour
 
         Tensor tensorAcc = Tensor.zero();
 
-        this.basisFields.ForEach(field => tensorAcc.add(field.getWeightedTensor(point, this.smooth), this.smooth));
+        foreach (BasisField field in this.basisFields)
+        {
+            tensorAcc.add(field.getWeightedTensor(point, this.smooth), this.smooth);
+        }
 
         // add rotational noise for parks, range of -pi/2 to pi/2
-        if (this.parks.Exists(p => PolygonUtil.insidePolygon(point, p)))
+        foreach (List<Vector3> p in this.parks)
         {
-            tensorAcc.rotate(getRotationalNoise(point, this.nParams.noiseSizePark, this.nParams.noiseAnglePark));
+            if (PolygonUtil.insidePolygon(point, p))
+            {
+                tensorAcc.rotate(getRotationalNoise(point, this.nParams.noiseSizePark, this.nParams.noiseAnglePark));
+            }
         }
 
         if (this.nParams.globalNoise)
